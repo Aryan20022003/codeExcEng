@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const upload=require("../middleware/upload");
-const uploadController=require("../controller/upload")
+const controller=require("../controller/submission")
 // const submissionController = require("../controllers/submission");
 // const { validateSubmission } = require("../middlewares/validation");
 // const { authenticate } = require("../middlewares/authentication");
@@ -11,6 +11,6 @@ const uploadController=require("../controller/upload")
 // router.post("/", authenticate, validateSubmission, submissionController.createSubmission);
 // router.get("/:id", authenticate, submissionController.getSubmissionById);
 
-router.post("/",upload.fileUpload.single('sourceCode'),uploadController.bucketUpload);
+router.post("/",upload.fileUpload.single('sourceCode'),controller.executionWithInput);
 
 module.exports = router;

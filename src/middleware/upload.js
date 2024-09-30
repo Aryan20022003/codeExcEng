@@ -20,7 +20,6 @@ const fileUpload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // Set file size limit to 5MB
   fileFilter: (req, file, cb) => {
-    // Only allow C++, Java, Python files
     const filetypes = /cpp|java|py/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = file.mimetype === 'text/x-c' || file.mimetype === 'text/x-java' || file.mimetype === 'text/x-python' || extname;
@@ -34,10 +33,6 @@ const fileUpload = multer({
   }
 });
 
-const bucketUpload=(req,resp)=>{
-    console.log("bucket upload begins....",req.file);
-    resp.status(200).send('Uploaded');
-}
 
 
 module.exports = {

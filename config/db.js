@@ -17,5 +17,5 @@ pool.connect((err) => {
   }
 });
 
-// Export the pool to use it in the app
+
 module.exports = pool;

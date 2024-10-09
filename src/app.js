@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const submission = require("./routes/submission");
+const pool = require("./../config/db");
 // const execution = require("./routes/execution");
 
 const app = express();

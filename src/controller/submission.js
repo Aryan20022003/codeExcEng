@@ -1,32 +1,19 @@
 const fileUtils = require("../../utils/fileUtils");
 const bucketDestination = require("../../config/serviceAccount");
 
-const executionWithInput = async (req, res) => {
-  try {
-    const localFilePath = req.file.path;
-    const extension = req.file.originalname.split(".").pop();
-    const fileName = req.file.filename;
-    const uploadAddress = `${bucketDestination.uploadDestination}${fileName}`;
-    const metadata = {
-      fileName: fileName,
-      extension: extension,
-      date: Date.now(),
-    };
-    // console.log(
-    //   `localFilePath ${localFilePath} extension of file ${extension} fileName ${fileName}`
-    // );
+//TODO : Implement the function to push to queue and return the response 
+//req.cloudData={uploadAddress,fileName,uploadId}
 
-    const upload = await fileUtils.uploadFileToBucket(
-      localFilePath,
-      uploadAddress,
-      metadata
-    );
+const pushToQueue = async (req, res) => {
+  try {
+    // Implement the function to push to queue
+    // console.log(`pushToQueue ${req.cloudData.uploadId}`);
     res.status(200).json({
-      message: "File uploaded successfully",
-      fileName: fileName,
+      message: "File uploaded and pushed to queue successfully",
+      uploadId: req.cloudData,
     });
   } catch (error) {
-    console.error("Error during file upload:", error.message);
+    console.error("Error pushing to queue:", error.message);
     res.status(500).json({
       message: "An error occurred during file upload",
       error: error.message,
@@ -34,4 +21,5 @@ const executionWithInput = async (req, res) => {
   }
 };
 
-module.exports = { executionWithInput };
+
+module.exports = { pushToQueue };

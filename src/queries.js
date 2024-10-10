@@ -21,6 +21,12 @@ module.exports = {
         exeLimit INT
       );`,
 
+  //temp database to test the logic of submission
+  createSubmissionTableDummy: ` CREATE TABLE IF NOT EXISTS testDb (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        codeFilePath VARCHAR(255),
+      );`,
+
   createSubmissionTable: `
       CREATE TABLE IF NOT EXISTS submissionDb (
         id INT PRIMARY KEY,
@@ -46,4 +52,6 @@ module.exports = {
       INSERT INTO submissionDb (
         id, userId, codeFilePath, inputFilePath, languageID, limitId, submissionTime
       ) VALUES ($1, $2, $3, $4, $5, $6, $7);`,
+
+    insertSubmissionDummy: `INSERT INTO testDb (codeFilePath) VALUES ($1) RETURNING id;`,
 };

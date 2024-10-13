@@ -10,11 +10,9 @@ const pushToQueue = async (req, res) => {
     // Implement the function to push to queue
     // console.log(`pushToQueue ${req.cloudData.uploadId}`);
     //cloudData={uploadAddress,fileName,uploadId,extension}
-    const signedUrl = await fileUtils.signedUrl(req.cloudData.uploadAddress);
-    const cloudData = { ...req.cloudData, codeUrl: signedUrl };
     await globalQueue.add(
       `${req.cloudData.uploadId}_${req.cloudData.fileName}`,
-      cloudData,
+      req.cloudData,
       { removeOnComplete: true, removeOnFail: 5000 }
     );
     res.status(200).json({

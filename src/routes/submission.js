@@ -15,6 +15,7 @@ router.post(
   upload.fileUpload.single("sourceCode"),
   upload.uploadToCloud,
   upload.populateSubmissionDb,
+  upload.addDownloadUrls,
   controller.pushToQueue
 );
 

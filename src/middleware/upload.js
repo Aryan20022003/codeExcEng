@@ -4,8 +4,8 @@ const path = require("path");
 const fs = require("fs");
 const fileUtils = require("../../utils/fileUtils");
 const bucketDestination = require("../../config/serviceAccount");
-const queries=require("../queries");
-const pool=require("../../config/db");
+const { operationQueries } = require("../queries");
+const pool = require("../../config/db");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -79,25 +79,41 @@ const uploadToCloud = async (req, resp, next) => {
 };
 
 const populateSubmissionDb = async (req, res, next) => {
-  const data=req.cloudData;
+  const data = req.cloudData;
   console.log(`data ${data}`);
-  try{
-      const uploadId=await pool.query(queries.insertSubmissionDummy,[data.uploadAddress]);
-      req.cloudData.uploadId=uploadId.rows[0].id;
-      console.log(`uploaded to dummyDB -> queue uploadId ${uploadId.rows[0].id}`);
-      next();
-  }
-  catch(error){
-    console.error("error in populateSubmissionDb",error.message);
+  try {
+    const uploadId = await pool.query(operationQueries.insertSubmissionDummy, [
+      data.uploadAddress,
+    ]);
+    req.cloudData.uploadId = uploadId.rows[0].id;
+    console.log(`uploaded to dummyDB -> queue uploadId ${uploadId.rows[0].id}`);
+    next();
+  } catch (error) {
+    console.error("error in populateSubmissionDb", error.message);
     res.status(500).json({
       message: "An error occurred during file upload",
     });
-
   }
-}
+};
+const addDownloadUrls = async (req, res, next) => {
+  try {
+    const data = req.cloudData;
+    const signedUrl = await fileUtils.signedUrl(data.uploadAddress);
+    req.cloudData.codeUrl = signedUrl[0];
+    next();
+  } catch (error) {
+    console.error("error in addDownloadUrls", error.message);
+    res.status(500).json({
+      message: "An error occurred during file upload",
+    });
+  }
+};
 
 module.exports = {
-  fileUpload,uploadToCloud,populateSubmissionDb
+  fileUpload,
+  uploadToCloud,
+  populateSubmissionDb,
+  addDownloadUrls,
 };
 
 // // POST route for file upload

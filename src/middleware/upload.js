@@ -5,6 +5,7 @@ const fs = require("fs");
 const fileUtils = require("../../utils/fileUtils");
 const bucketDestination = require("../../config/serviceAccount");
 const queries=require("../queries");
+const pool=require("../../config/db");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

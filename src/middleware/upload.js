@@ -64,6 +64,7 @@ const uploadToCloud = async (req, resp, next) => {
     const cloudData = {
       fileName: fileName,
       uploadAddress: uploadAddress,
+      extension: extension,
     };
     req.cloudData = cloudData;
     next();

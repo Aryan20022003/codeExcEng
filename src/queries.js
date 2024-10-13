@@ -53,5 +53,5 @@ module.exports = {
         id, userId, codeFilePath, inputFilePath, languageID, limitId, submissionTime
       ) VALUES ($1, $2, $3, $4, $5, $6, $7);`,
 
-    insertSubmissionDummy: `INSERT INTO testDb (codeFilePath) VALUES ($1) RETURNING id;`,
+  insertSubmissionDummy: `INSERT INTO testDb (codeFilePath) VALUES ($1) RETURNING id;`,
 };

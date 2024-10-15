@@ -17,6 +17,12 @@ const createWorkers = async () => {
         },
       })
     );
+    workers[i].on("completed", (job) => {
+      console.log(`Job ${job.id} completed`);
+    });
+    workers[i].on("failed", (job, err) => {
+      console.log(`Job ${job.id} failed with error ${err.message}`);
+    });
   }
   console.log("Workers created", Date.now());
   return workers;

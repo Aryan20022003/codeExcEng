@@ -65,19 +65,19 @@ const uploadToCloud = async (req, resp, next) => {
     const cloudData = {
       fileName: fileName,
       uploadAddress: uploadAddress,
-      extension: extension,
+      localFilePath: localFilePath,
     };
     req.cloudData = cloudData;
     next();
   } catch (error) {
     console.error("Error during file upload:", error.message);
-    res.status(500).json({
+    resp.status(500).json({
       message: "An error occurred during file upload",
       error: error.message,
     });
   }
 };
-
+//req.cloudData={uploadAddress,fileName,localFilePath}----> {id,uploadAddress,fileName,localFilePath}
 const populateSubmissionDb = async (req, res, next) => {
   const data = req.cloudData;
   console.log(`data ${data}`);
@@ -85,8 +85,8 @@ const populateSubmissionDb = async (req, res, next) => {
     const uploadId = await pool.query(operationQueries.insertSubmissionDummy, [
       data.uploadAddress,
     ]);
-    req.cloudData.uploadId = uploadId.rows[0].id;
-    console.log(`uploaded to dummyDB -> queue uploadId ${uploadId.rows[0].id}`);
+    req.cloudData.id = uploadId.rows[0].id;
+    console.log(`uploaded to dummyDB -> queue id ${uploadId.rows[0].id}`);
     next();
   } catch (error) {
     console.error("error in populateSubmissionDb", error.message);

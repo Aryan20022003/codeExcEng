@@ -3,21 +3,21 @@ const bucketDestination = require("../../config/serviceAccount");
 const globalQueue = require("../../queue/queue");
 
 //TODO : Implement the function to push to queue and return the response
-//req.cloudData={uploadAddress,fileName,uploadId}
+//req.cloudData={uploadAddress,fileName,id}
 
 const pushToQueue = async (req, res) => {
   try {
     // Implement the function to push to queue
-    // console.log(`pushToQueue ${req.cloudData.uploadId}`);
-    //cloudData={uploadAddress,fileName,uploadId,extension}
+    // console.log(`pushToQueue ${req.cloudData.id}`);
+    //cloudData={uploadAddress,fileName,id,extension}
     await globalQueue.add(
-      `${req.cloudData.uploadId}_${req.cloudData.fileName}`,
+      `${req.cloudData.id}_${req.cloudData.fileName}`,
       req.cloudData,
       { removeOnComplete: true, removeOnFail: 5000 }
     );
     res.status(200).json({
       message: "File uploaded and pushed to queue successfully",
-      uploadId: req.cloudData,
+      id: req.cloudData,
     });
   } catch (error) {
     console.error("Error pushing to queue:", error.message);

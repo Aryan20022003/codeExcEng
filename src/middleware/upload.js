@@ -148,6 +148,7 @@ module.exports = {
   uploadToCloud,
   populateSubmissionDb,
   addDownloadUrls,
+  bringFileToLocal
 };
 
 // // POST route for file upload

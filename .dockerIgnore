@@ -1,4 +1,6 @@
 node_modules
+outputs
+downloads
 uploads
 .vscode
 config/serviceAccount.js

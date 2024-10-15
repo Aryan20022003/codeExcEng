@@ -2,6 +2,8 @@
 config/serviceAccount.js
 # Node modules
 node_modules/
+outputs/
+downloads/
 
 # Logs
 logs

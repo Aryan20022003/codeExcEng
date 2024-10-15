@@ -4,12 +4,38 @@ const fs = require("fs");
 const path = require("path");
 const stream = require("stream");
 
+//i want worker to handle error if data is not correct
+const checkJobData = (data) => {
+  if (!data.fileName) {
+    console.error("fileName not found in data");
+    return 0;
+  }
+  if (!data.localFilePath) {
+    console.error("localFilePath not found in data");
+    return 0;
+  }
+  if (!data.id) {
+    console.error("id not found in data");
+    return 0;
+  }
+  if (!data.codeUrl) {
+    console.error("codeUrl not found in data");
+    return 0;
+  }
+  return 1;
+};
+
+//data={fileName: "code.cpp", localFilePath: "/path/to/code.cpp", id: "1234",uploadAddress:"gs://bucketName/code.cpp",codeUrl:"https://bucketName/code.cpp"}
+//uploadAddress is not required here
 module.exports = async (job) => {
   let container = null;
   let docker = null;
   let imageName = null;
 
   try {
+    if (!checkJobData(job.data)) {
+      throw new Error("Invalid data");
+    }
     console.log("Starting job", job.id);
     const data = job.data;
     console.log("Received data:", data);
@@ -20,8 +46,8 @@ module.exports = async (job) => {
 
     const pack = tar.pack();
     const dockerFilePath = path.join(__dirname, `dockerFiles/Dockerfile`);
-    const codeFilePath = path.join(__dirname, `..`, `uploads`, data.fileName);
-
+    const codeFilePath = data.localFilePath;
+    console.log("codeFilePath", codeFilePath);
     if (!fs.existsSync(dockerFilePath)) {
       throw new Error("Dockerfile not found");
     }

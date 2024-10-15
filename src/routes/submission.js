@@ -18,5 +18,6 @@ router.post(
   upload.addDownloadUrls,
   controller.pushToQueue
 );
+router.post("/url", upload.addDownloadUrls, controller.pushToQueue);
 
 module.exports = router;

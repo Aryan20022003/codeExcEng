@@ -6,6 +6,8 @@ const fileUtils = require("../../utils/fileUtils");
 const bucketDestination = require("../../config/serviceAccount");
 const { operationQueries } = require("../queries");
 const pool = require("../../config/db");
+const { uniqueFileName } = require("../../utils/fileName");
+const { randomInt } = require("crypto");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -105,6 +107,38 @@ const addDownloadUrls = async (req, res, next) => {
     console.error("error in addDownloadUrls", error.message);
     res.status(500).json({
       message: "An error occurred during file upload",
+    });
+  }
+};
+
+const bringFileToLocal = async (req, res, next) => {
+  try {
+    const url = req.body.url;
+    const fileExt = req.body.extension || ".cpp";
+    const fileName = uniqueFileName(fileExt);
+    const fileSize = await fileUtils.getFileSize(url);
+    if (fileSize > 5 * 1024 * 1024) {
+      res.status(400).json({
+        message: "File size exceeds 5MB",
+      });
+    }
+    if (!fs.existsSync(path.join(__dirname, `../../downloads`))) {
+      fs.mkdirSync(path.join(__dirname, `../../downloads`));
+    }
+    const localFilePath = path.join(__dirname, `../../downloads/${fileName}`);
+    await fileUtils.downloadFileAndSaveToDestination(url, localFilePath);
+    const cloudData = {
+      fileName: fileName,
+      localFilePath: localFilePath,
+      id:`ran${randomInt(1000)}`,//update with database id
+      codeUrl:url,
+      uploadAddress:null
+    }
+    req.cloudData = cloudData;
+    next();
+  } catch (err) {
+    res.status(400).json({
+      message: "Invalid url or not downloadable",
     });
   }
 };

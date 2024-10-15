@@ -1,5 +1,7 @@
 const { bucket } = require("../config/firebase");
+const https = require("https");
 const fs = require("fs");
+const path = require("path");
 
 const mimeTypeMap = {
   cpp: "text/x-c++src",
@@ -12,7 +14,7 @@ const uploadFileToBucket = async (
   destinationFilePath,
   metaData
 ) => {
-  const fileStream = fs.createReadStream(localFilePath);
+  const fileStream = await fs.createReadStream(localFilePath);
   const file = bucket.file(destinationFilePath);
   console.log(metaData.extension, mimeTypeMap[metaData.extension]);
   const options = {
@@ -32,31 +34,35 @@ const uploadFileToBucket = async (
   });
 };
 
-const downloadFileAndSaveToDestination=async(url, directory, fileName)=>{
+const downloadFileAndSaveToDestination = async (url, directory, fileName) => {
   try {
     // Ensure the directory exists
-    fs.mkdir(directory, { recursive: true });
+    await fs.mkdir(directory, { recursive: true });
 
     const filePath = path.join(directory, fileName);
     const fileStream = fs.createWriteStream(filePath);
 
     await new Promise((resolve, reject) => {
-      https.get(url, (response) => {
-        if (response.statusCode !== 200) {
-          reject(new Error(`Failed to download file: ${response.statusCode}`));
-          return;
-        }
+      https
+        .get(url, (response) => {
+          if (response.statusCode !== 200) {
+            reject(
+              new Error(`Failed to download file: ${response.statusCode}`)
+            );
+            return;
+          }
 
-        response.pipe(fileStream);
+          response.pipe(fileStream);
 
-        fileStream.on('finish', () => {
-          fileStream.close();
-          console.log(`File downloaded successfully: ${filePath}`);
-          resolve();
-        });
-      }).on('error', reject);
+          fileStream.on("finish", () => {
+            fileStream.close();
+            console.log(`File downloaded successfully: ${filePath}`);
+            resolve();
+          });
+        })
+        .on("error", reject);
 
-      fileStream.on('error', reject);
+      fileStream.on("error", reject);
     });
 
     return filePath;
@@ -64,7 +70,7 @@ const downloadFileAndSaveToDestination=async(url, directory, fileName)=>{
     await fs.unlink(filePath).catch(() => {}); // Delete the file if there's an error
     throw error;
   }
-}
+};
 
 const signedUrl = async (filePathBucket, hoursToLive = 0.5) => {
   const file = bucket.file(filePathBucket);
@@ -77,6 +83,26 @@ const signedUrl = async (filePathBucket, hoursToLive = 0.5) => {
   return file.getSignedUrl(options);
 };
 
+const getFileSize = async (url) => {
+  try {
+    const response = await new Promise((resolve, reject) => {
+      https
+        .get(url, { method: "HEAD" }, (response) => {
+          const contentLength = response.headers["content-length"];
+          if (!contentLength) {
+            reject(new Error("Content-Length header missing"));
+          } else {
+            resolve(contentLength);
+          }
+        })
+        .on("error", reject);
+    });
+  } catch (error) {
+    console.log("Error in getting file size", error.message);
+    return 10 * 1048576;
+  }
+};
+
 //TODO: Implement the downloadFile function
 const downLoadFileFromBucket = {};
 
@@ -85,4 +111,6 @@ module.exports = {
   signedUrl,
   mimeTypeMap,
   downLoadFileFromBucket,
+  downloadFileAndSaveToDestination,
+  getFileSize
 };

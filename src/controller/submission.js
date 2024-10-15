@@ -9,7 +9,7 @@ const pushToQueue = async (req, res) => {
   try {
     // Implement the function to push to queue
     // console.log(`pushToQueue ${req.cloudData.id}`);
-    //cloudData={uploadAddress,fileName,id,extension}
+    //cloudData={id,uploadAddress,fileName,localFilePath,codeUrl}
     await globalQueue.add(
       `${req.cloudData.id}_${req.cloudData.fileName}`,
       req.cloudData,

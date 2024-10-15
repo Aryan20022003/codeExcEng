@@ -12,6 +12,7 @@ module.exports = async (job) => {
   try {
     console.log("Starting job", job.id);
     const data = job.data;
+    console.log("Received data:", data);
     const fileNameWithOutExtension = data.fileName.split(".")[0];
 
     docker = new Docker({ socketPath: "/var/run/docker.sock" });

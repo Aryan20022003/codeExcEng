@@ -32,6 +32,40 @@ const uploadFileToBucket = async (
   });
 };
 
+const downloadFileAndSaveToDestination=async(url, directory, fileName)=>{
+  try {
+    // Ensure the directory exists
+    fs.mkdir(directory, { recursive: true });
+
+    const filePath = path.join(directory, fileName);
+    const fileStream = fs.createWriteStream(filePath);
+
+    await new Promise((resolve, reject) => {
+      https.get(url, (response) => {
+        if (response.statusCode !== 200) {
+          reject(new Error(`Failed to download file: ${response.statusCode}`));
+          return;
+        }
+
+        response.pipe(fileStream);
+
+        fileStream.on('finish', () => {
+          fileStream.close();
+          console.log(`File downloaded successfully: ${filePath}`);
+          resolve();
+        });
+      }).on('error', reject);
+
+      fileStream.on('error', reject);
+    });
+
+    return filePath;
+  } catch (error) {
+    await fs.unlink(filePath).catch(() => {}); // Delete the file if there's an error
+    throw error;
+  }
+}
+
 const signedUrl = async (filePathBucket, hoursToLive = 0.5) => {
   const file = bucket.file(filePathBucket);
   const options = {

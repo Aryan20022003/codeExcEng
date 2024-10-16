@@ -27,6 +27,13 @@ const createQueries = {
     codeFilePath VARCHAR(255)
   );`,
 
+  createDummyExecutionTable: `
+  CREATE TABLE IF NOT EXISTS executionDb (
+    id SERIAL PRIMARY KEY,
+    submissionId INT UNIQUE NOT NULL,
+    status VARCHAR(50) CHECK (status IN ('completed', 'submitted', 'running', 'error')) DEFAULT 'submitted',
+    outputFilePath VARCHAR(255)
+  );`,
   createSubmissionTable: `
   CREATE TABLE IF NOT EXISTS submissionDb (
     id INT PRIMARY KEY,
@@ -56,6 +63,11 @@ const operationQueries = {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7);`,
 
   insertSubmissionDummy: `INSERT INTO testDb (codeFilePath) VALUES ($1) RETURNING id;`,
+  insertDummyExecution: `INSERT INTO executionDb (submissionId) VALUES ($1) RETURNING id;`,
+  updateExecutionStatus: `UPDATE executionDb SET status = $1 WHERE submissionId = $2;`,
+  setOutputFilePath: `UPDATE executionDb SET outputFilePath = $1 WHERE submissionId = $2;`,
+  getOutputFilePath: `SELECT outputFilePath FROM executionDb WHERE submissionId = $1;`,
+  getStatus: `SELECT status FROM executionDb WHERE submissionId = $1;`,
 };
 
 module.exports = { createQueries, operationQueries };

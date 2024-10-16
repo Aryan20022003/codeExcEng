@@ -3,6 +3,10 @@ const Docker = require("dockerode");
 const fs = require("fs");
 const path = require("path");
 const stream = require("stream");
+const pool = require("../config/db");
+const { operationQueries } = require("../src/queries");
+const { uploadFileToBucket } = require("../utils/fileUtils");
+const { uploadDestination } = require("../config/serviceAccount");
 
 //i want worker to handle error if data is not correct
 const checkJobData = (data) => {
@@ -36,6 +40,10 @@ module.exports = async (job) => {
     if (!checkJobData(job.data)) {
       throw new Error("Invalid data");
     }
+    await pool.query(operationQueries.updateExecutionStatus, [
+      "running",
+      job.data.id,
+    ]);
     console.log("Starting job", job.id);
     const data = job.data;
     console.log("Received data:", data);
@@ -170,6 +178,26 @@ module.exports = async (job) => {
     console.log("Output saved to", outputFilePath);
     console.log("Output content:", outputData);
 
+    const submissionUploadAddress = `${uploadDestination}outputs/${fileNameWithOutExtension}.txt`;
+    await uploadFileToBucket(outputFilePath, submissionUploadAddress, {
+      submissionId: data.id,
+      codeFileName: data.fileName,
+    });
+
+    await pool.query(operationQueries.updateExecutionStatus, [
+      "completed",
+      data.id,
+    ]);
+    await pool.query(operationQueries.setOutputFilePath, [
+      submissionUploadAddress,
+      data.id,
+    ]);
+    console.log(
+      "Output uploaded to bucket and saved to database",
+      submissionUploadAddress
+    );
+    job.data.submissionUploadAddress = submissionUploadAddress;
+
     if (exitCode.StatusCode === 0) {
       console.log("Execution successful.");
     } else {
@@ -179,6 +207,12 @@ module.exports = async (job) => {
     return { success: true, output: outputData, exitCode: exitCode.StatusCode };
   } catch (error) {
     console.error("Error:", error.message);
+    if (job.data.id) {
+      await pool.query(operationQueries.updateExecutionStatus, [
+        "error",
+        job.data.id,
+      ]);
+    }
     return { success: false, error: error.message };
   } finally {
     if (container && docker) {

@@ -16,7 +16,6 @@ app.use('/ping', (req, res) => {
   res.json({ message: "pong" });
 });
 app.use('/api/v1/submission', submission);
-// app.use('/api/v1/execution', execution);
 
 
 app.use((err, req, res, next) => {

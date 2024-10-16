@@ -7,10 +7,12 @@ createWorkers();
 
 //TODO:Move to different file and call it from there
 const { createQueries } = require("./queries");
-pool
-  .query(createQueries.createSubmissionTableDummy)
-  .then((res) => {
-    console.log("Table created");
+Promise.all([
+  pool.query(createQueries.createSubmissionTableDummy),
+  pool.query(createQueries.createDummyExecutionTable),
+])
+  .then(() => {
+    console.log("Tables created");
   })
   .catch((err) => {
     console.log(err);

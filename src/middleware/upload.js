@@ -150,19 +150,3 @@ module.exports = {
   addDownloadUrls,
   bringFileToLocal
 };
-
-// // POST route for file upload
-// app.post('/upload', upload.single('sourceFile'), (req, res) => {
-//   try {
-//     // File successfully uploaded
-//     console.log(req.file); // Logs the file details to the console
-//     res.send('File uploaded successfully');
-//   } catch (err) {
-//     res.status(400).send('Error uploading file');
-//   }
-// });
-
-// // Start the server
-// app.listen(3000, () => {
-//   console.log('Server started on port 3000');
-// });
